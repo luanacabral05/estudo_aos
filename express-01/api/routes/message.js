@@ -24,6 +24,18 @@ router.post("/", async (req, res) => {
   return res.send(message);
 });
 
+router.put("/:messageId", async (req, res) => {
+  const message = await req.context.models.Message.findByPk(
+    req.params.messageId,
+  );
+
+  await message.update({
+    text: req.body.text,
+  });
+
+  return res.send(message);
+});
+
 router.delete("/:messageId", async (req, res) => {
   const result = await req.context.models.Message.destroy({
     where: { id: req.params.messageId },
