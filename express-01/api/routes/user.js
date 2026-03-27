@@ -3,41 +3,74 @@ import { Router } from "express";
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const users = await req.context.models.User.findAll();
-  return res.send(users);
+  try {
+    const users = await req.context.models.User.findAll();
+    return res.status(200).json(users);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.get("/:userId", async (req, res) => {
-  const user = await req.context.models.User.findByPk(req.params.userId);
-  return res.send(user);
+  try {
+    const user = await req.context.models.User.findByPk(req.params.userId);
+
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.post("/", async (req, res) => {
-  const user = await req.context.models.User.create({
-    username: req.body.username,
-    email: req.body.email,
-  });
+  try {
+    const user = await req.context.models.User.create({
+      username: req.body.username,
+      email: req.body.email,
+    });
 
-  return res.send(user);
+    return res.status(201).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.put("/:userId", async (req, res) => {
-  const user = await req.context.models.User.findByPk(req.params.userId);
+  try {
+    const user = await req.context.models.User.findByPk(req.params.userId);
 
-  await user.update({
-    username: req.body.username,
-    email: req.body.email,
-  });
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
 
-  return res.send(user);
+    await user.update({
+      username: req.body.username,
+      email: req.body.email,
+    });
+
+    return res.status(200).json(user);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.delete("/:userId", async (req, res) => {
-  await req.context.models.User.destroy({
-    where: { id: req.params.userId },
-  });
+  try {
+    const user = await req.context.models.User.findByPk(req.params.userId);
 
-  return res.send(true);
+    if (!user) {
+      return res.status(404).json({ message: "Usuário não encontrado" });
+    }
+
+    await user.destroy();
+
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 export default router;

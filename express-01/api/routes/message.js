@@ -1,47 +1,81 @@
 import { Router } from "express";
-import { v4 as uuidv4 } from "uuid";
 
 const router = Router();
 
 router.get("/", async (req, res) => {
-  const messages = await req.context.models.Message.findAll();
-  return res.send(messages);
+  try {
+    const messages = await req.context.models.Message.findAll();
+    return res.status(200).json(messages);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.get("/:messageId", async (req, res) => {
-  const message = await req.context.models.Message.findByPk(
-    req.params.messageId,
-  );
-  return res.send(message);
+  try {
+    const message = await req.context.models.Message.findByPk(
+      req.params.messageId,
+    );
+
+    if (!message) {
+      return res.status(404).json({ message: "Mensagem não encontrada" });
+    }
+
+    return res.status(200).json(message);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.post("/", async (req, res) => {
-  const message = await req.context.models.Message.create({
-    text: req.body.text,
-    userId: req.context.me.id,
-  });
+  try {
+    const message = await req.context.models.Message.create({
+      text: req.body.text,
+      userId: req.context.me.id,
+    });
 
-  return res.send(message);
+    return res.status(201).json(message);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.put("/:messageId", async (req, res) => {
-  const message = await req.context.models.Message.findByPk(
-    req.params.messageId,
-  );
+  try {
+    const message = await req.context.models.Message.findByPk(
+      req.params.messageId,
+    );
 
-  await message.update({
-    text: req.body.text,
-  });
+    if (!message) {
+      return res.status(404).json({ message: "Mensagem não encontrada" });
+    }
 
-  return res.send(message);
+    await message.update({
+      text: req.body.text,
+    });
+
+    return res.status(200).json(message);
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 router.delete("/:messageId", async (req, res) => {
-  const result = await req.context.models.Message.destroy({
-    where: { id: req.params.messageId },
-  });
+  try {
+    const message = await req.context.models.Message.findByPk(
+      req.params.messageId,
+    );
 
-  return res.send(true);
+    if (!message) {
+      return res.status(404).json({ message: "Mensagem não encontrada" });
+    }
+
+    await message.destroy();
+
+    return res.status(204).send();
+  } catch (error) {
+    return res.status(500).json({ message: "Erro interno do servidor" });
+  }
 });
 
 export default router;
