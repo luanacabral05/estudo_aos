@@ -27,9 +27,33 @@ app.use("/users", routes.user);
 app.use("/messages", routes.message);
 
 app.get("/", (req, res) => {
-  res.send(
+  res.status(200).send(
     "Received a GET HTTP method\nServidor rodando!\n" + process.env.MESSAGE,
   );
+});
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+
+  if (err.name === "SequelizeValidationError") {
+    return res.status(400).send({
+      error: "Bad Request: Validation failed.",
+      messages: err.errors.map((e) => e.message),
+    });
+  }
+
+  if (err.name === "SequelizeUniqueConstraintError") {
+    return res.status(409).send({
+      error: "Conflict: Resource already exists.",
+      messages: err.errors.map((e) => e.message),
+    });
+  }
+
+  res.status(500).send({
+    error: "Something went wrong! Internal Server Error.",
+    message: err.message,
+  });
 });
 
 const port = process.env.PORT ?? 3000;
