@@ -3,7 +3,7 @@ import cors from "cors";
 import express from "express";
 
 import models, { sequelize } from "./models";
-import routes from "./routes";
+import { session, user, message } from "./routes";
 
 const app = express();
 app.set("trust proxy", true);
@@ -22,9 +22,9 @@ app.use((req, res, next) => {
   next();
 });
 
-app.use("/session", routes.session);
-app.use("/users", routes.user);
-app.use("/messages", routes.message);
+app.use("/session", session);
+app.use("/users", user);
+app.use("/messages", message);
 
 app.get("/", (req, res) => {
   res.status(200).send(
